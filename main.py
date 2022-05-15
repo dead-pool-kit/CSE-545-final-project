@@ -14,12 +14,7 @@ import sys
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-dataAirPol2 = pd.read_csv("data/dataAllCountryModified.csv")
-dataTimeSer2 = pd.read_csv("data/dataAllCountryModified.csv")
-dataRidge = pd.read_csv("data/tmp2.csv")
-dataAllCountry= pd.read_csv("data/dataAllCountryModified.csv")
-dataBarChart2 = pd.read_csv("data/dataAllCountryModified.csv")
-dataMainCountries = pd.read_csv("data/dfFltrd8May.csv")
+dataMainCountries = pd.read_csv("data/dfCountryImputed2.csv")
 
 fileCoord = "data/mapCoordinates.json"
 dataCoord = 1
@@ -32,12 +27,7 @@ mds_fitted_pc = None
 
 
 def preprocess():
-    global dataAllCountry, dataMainCountries
-
-    dataAllCountry = dataAllCountry.dropna(axis=1, thresh=20)
-    dataAllCountry = dataAllCountry.dropna(axis=0, thresh=20)
-    dataAllCountry.fillna(0, inplace=True)
-
+    global dataMainCountries
 
     selFtrs = [
     "Year",
@@ -48,62 +38,62 @@ def preprocess():
     "Mineral rents (% of GDP)",
     "GDP (current US$)", 
     "GNI (current US$)",
-    "Compulsory education, duration (years)",
+    "Compulsory education duration (years)",
     "Number of infant deaths", 
     "Adjusted savings: natural resources depletion (% of GNI)",
     "Adjusted savings: energy depletion (% of GNI)",
     "Adjusted savings: carbon dioxide damage (% of GNI)",
     "Renewable energy consumption (% of total final energy consumption)",
     "Individuals using the Internet (% of population)", 
-    "Access to electricity, urban (% of urban population)", 
+    "Access to electricity urban (% of urban population)", 
     "Urban population growth (annual %)",
     "Exports of goods and services (% of GDP)", 
     "Imports of goods and services (% of GDP)",                                                        
     "Trade (% of GDP)",   
-    "Net bilateral aid flows from DAC donors, United States (current US$)",
-    "Net bilateral aid flows from DAC donors, Total (current US$)",
+    "Net bilateral aid flows from DAC donors United States (current US$)",
+    "Net bilateral aid flows from DAC donors Total (current US$)",
     "Current health expenditure (% of GDP)",
-    "International tourism, expenditures (% of total imports)",
+    "International tourism expenditures (% of total imports)",
     "Cost of business start-up procedures (% of GNI per capita)",
-    "Communications, computer, etc. (% of service imports, BoP)",
+    "Communications computer etc. (% of service imports BoP)",
     "Market capitalization of listed domestic companies (% of GDP)",
-    "Listed domestic companies, total",
+    "Listed domestic companies total",
     "Energy intensity level of primary energy (MJ/$2011 PPP GDP)",
-    "PM2.5 air pollution, population exposed to levels exceeding WHO guideline value (% of total)",
+    "PM2.5 air pollution population exposed to levels exceeding WHO guideline value (% of total)",
     "Research and development expenditure (% of GDP)",
-    "Hospital beds (per 1,000 people)",
+    "Hospital beds (per 1000 people)",
     "High-technology exports (current US$)",
-    "New business density (new registrations per 1,000 people ages 15-64)",
+    "New business density (new registrations per 1000 people ages 15-64)",
     "Exports as a capacity to import (constant LCU)",
-    "International tourism, number of arrivals",
-    "Probability of dying among youth ages 20-24 years (per 1,000)",
-    "International tourism, number of departures",
-    "Physicians (per 1,000 people)",
-    "Automated teller machines (ATMs) (per 100,000 adults)",
+    "International tourism number of arrivals",
+    "Probability of dying among youth ages 20-24 years (per 1000)",
+    "International tourism number of departures",
+    "Physicians (per 1000 people)",
+    "Automated teller machines (ATMs) (per 100000 adults)",
     "Prevalence of undernourishment (% of population)",
     "CO2 emissions (metric tons per capita)"               
 
     ]
-    dataMainCountries = dataMainCountries[[*selFtrs]]
+    # dataMainCountries = dataMainCountries[[*selFtrs]]
 
     dataMainCountries["GNI (current US$)"]  = dataMainCountries["GNI (current US$)"]/1000000000
     dataMainCountries["GDP (current US$)"]  = dataMainCountries["GDP (current US$)"]/1000000000
-    dataMainCountries["Net bilateral aid flows from DAC donors, Total (current US$)"]  = dataMainCountries["Net bilateral aid flows from DAC donors, Total (current US$)"]/1000000
-    dataMainCountries["Net bilateral aid flows from DAC donors, United States (current US$)"]  = dataMainCountries["Net bilateral aid flows from DAC donors, United States (current US$)"]/1000000
+    dataMainCountries["Net bilateral aid flows from DAC donors Total (current US$)"]  = dataMainCountries["Net bilateral aid flows from DAC donors Total (current US$)"]/1000000
+    dataMainCountries["Net bilateral aid flows from DAC donors United States (current US$)"]  = dataMainCountries["Net bilateral aid flows from DAC donors United States (current US$)"]/1000000
     dataMainCountries["Exports as a capacity to import (constant LCU)"]  = dataMainCountries["Exports as a capacity to import (constant LCU)"]/1000000000
     dataMainCountries["High-technology exports (current US$)"]  = dataMainCountries["High-technology exports (current US$)"]/1000000
-    dataMainCountries["International tourism, number of departures"]  = dataMainCountries["International tourism, number of departures"]/1000000
-    dataMainCountries["International tourism, number of arrivals"]  = dataMainCountries["International tourism, number of arrivals"]/1000000
+    dataMainCountries["International tourism number of departures"]  = dataMainCountries["International tourism number of departures"]/1000000
+    dataMainCountries["International tourism number of arrivals"]  = dataMainCountries["International tourism number of arrivals"]/1000000
+    dataMainCountries["Net bilateral aid flows from DAC donors Japan (current US$)"]  = dataMainCountries["Net bilateral aid flows from DAC donors Japan (current US$)"]/1000000
+    dataMainCountries["Net bilateral aid flows from DAC donors Norway (current US$)"]  = dataMainCountries["Net bilateral aid flows from DAC donors Norway (current US$)"]/1000000
+    dataMainCountries["Net bilateral aid flows from DAC donors Germany (current US$)"]  = dataMainCountries["Net bilateral aid flows from DAC donors Germany (current US$)"]/1000000
+    dataMainCountries["Foreign direct investment net outflows (BoP current US$)"]  = dataMainCountries["Foreign direct investment net outflows (BoP current US$)"]/1000000000
 
 
     countriesToRemove = ["WLD", "HIC", "OED", "PST", "IBT", "ECS", "LMY", "MIC", "IBD", "NAC", "EAS", "UMC", "EUU",
      "LTE", "EMU", "EAP", "TEA", "EAR", "LMC", "LCN", "TLA", "LAC", "TEC", "ECA", "CEB","ARB", "TSA", "SAS","MEA","IDA",
      "SSF", "TSS", "SSA", "PRE", "IDX", "FCS", "LIC", "IDB", "MNA","TMN","AFE","AFW"]
     dataMainCountries = dataMainCountries[~dataMainCountries['Country Code'].isin(countriesToRemove)]
-
-    # dataMainCountries.fillna(0, inplace=True)
-    print('preprocesssssss')
-    print(dataAllCountry)
 
 
 @app.route("/mapping/countryCodes", methods=["GET"])
@@ -151,16 +141,7 @@ def get_top_ten():
     return ret
 
 
-@app.route("/worldmap", methods=["GET"])
-def get_map_data():
-    global dataMainCountries
-    data = dataMainCountries[dataMainCountries['GDP (current US$)'].notna()]
-    data = data[['GDP (current US$)', 'Country Code', 'Country Name', 'Year']]
-    datadict = data.to_dict(orient="records")
-    xx = json.dumps(datadict)
-    return xx
-
-@app.route("/worldmap2", methods=["GET", "POST"])
+@app.route("/worldmap", methods=["GET", "POST"])
 def get_WmapData():
     global dataMainCountries
     wmapFtr  = 'GDP (current US$)'
@@ -186,7 +167,7 @@ def get_WmapData():
 
 
 #accept the country code in body and filter results
-@app.route("/timeser2", methods=["GET", "POST"])
+@app.route("/timeser", methods=["GET", "POST"])
 def get_time_ser2():
 
     global dataMainCountries, listCountryCodeTime
@@ -196,9 +177,6 @@ def get_time_ser2():
         attr =  request.get_json()['attr']
         reset =  request.get_json()['reset']
 
-        # if 'attr' in request.get_json()['attr']:
-        #     listCountryCodeTime= ['USA']
-
         if country not in listCountryCodeTime:
             listCountryCodeTime.append(country)
         
@@ -207,9 +185,7 @@ def get_time_ser2():
 
 
     dataTime = dataMainCountries.fillna(0)
-    dataTime = dataTime[[attr, 'Country Code', 'Country Name', 'Year']][dataTime['Year']<2020]
-
-    dataTime
+    dataTime = dataTime[[attr, 'Country Code', 'Country Name', 'Year']]
 
     dataTime = dataTime[dataTime['Country Code'].isin(listCountryCodeTime)]
 
@@ -222,16 +198,6 @@ def get_time_ser2():
     # print(mds_dcata)
     return json.dumps(dfTimetmp)
 
-            
-
-
-@app.route("/ridge", methods=["GET"])
-def get_ridge():
-    global dataRidge
-
-    dataRidgetmp = dataRidge.to_dict(orient="records")
-    # print(mds_dcata)
-    return json.dumps(dataRidgetmp)
 
 @app.route("/all/countries", methods=["GET"])
 def get_all_countries():
@@ -241,6 +207,58 @@ def get_all_countries():
     # print(mds_dcata)
     return json.dumps(dataAllCountrytmp)
 
+
+@app.route("/hypothesis", methods=["GET", "POST"])
+def getHypothesis():
+   
+    global dataMainCountries
+
+    if(request.method == 'POST'):
+        yearSt = request.get_json()['yearSt']
+        yearEnd = request.get_json()['yearEnd']
+        axisList = request.get_json()['axis']
+
+    res = {}
+    res['A']=1
+    res['B']=2
+    res['C']=3
+    res['D']=4
+    res['E']=5
+    res['pVal']=0.05
+    res['fVal']=100
+
+    return res
+
+
+@app.route("/similarity", methods=["GET", "POST"])
+def getSimilarity():
+   
+    global dataMainCountries
+
+    if(request.method == 'POST'):
+        yearSt = request.get_json()['yearSt']
+        yearEnd = request.get_json()['yearEnd']
+        axisList = request.get_json()['axis']
+
+    #list of json= {((cnt1,cnt2),corr)}
+    finaRes = []
+    res = [] 
+    # take only top 5
+    
+    for i in range(5):
+        xx=(('ctry'+str(i), 'year'+str(i)),i)
+        res.append(xx)
+  
+    res= res[:5]
+
+    for ele in res:
+        map = {}
+        map['Country'] = ele[0][0]
+        map['Year'] = ele[0][1]
+        map['Distance'] = ele[1]
+        finaRes.append(map)
+
+    return json.dumps(finaRes)
 
 @app.route("/pcp", methods=["GET", "POST"])
 def get_pcp():
@@ -252,7 +270,6 @@ def get_pcp():
 
     # print('pcpp  ', axisList)
     axisList.extend(['Country Name', 'Country Code'])
-
     
     dataMainCountriestmp = dataMainCountries[(dataMainCountries['Year'] >=yearSt) & (dataMainCountries['Year'] <=yearEnd)]
     dataMainCountriestmp = dataMainCountriestmp[[*axisList]]
@@ -315,8 +332,6 @@ def get_Coord():
     f = open (fileCoord, "r")
     dataCoord = json.loads(f.read())
 
-
-
     # dataRidgetmp = dataRidge.to_dict(orient="records")
     # print(mds_dcata)
     return dataCoord
@@ -328,5 +343,5 @@ def index():
 if __name__=="__main__":
     print("Hello")
     preprocess()
-    app.run(host='0.0.0.0', port=8081, debug=True)
+    app.run(host='0.0.0.0', port=8083, debug=True)
     app.config['TEMPLATES_AUTO_RELOAD'] = True

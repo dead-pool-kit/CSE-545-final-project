@@ -4,7 +4,7 @@ defaultFeature  = 'GDP (current US$)'
 yearSt = 2000
 yearEnd = 2019
 
-fetch('/worldmap2', {
+fetch('/worldmap', {
   method: "POST",
   headers: {
     'Content-Type': 'application/json'
@@ -237,7 +237,7 @@ function createWorldMap(dataWrld, topo) {
   }
   let onClick = function(d) {
     country = d.id;
-    fetch('/timeser2', {
+    fetch('/timeser', {
       method: "POST",
       headers: {
         'Content-Type': 'application/json'

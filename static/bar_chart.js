@@ -70,7 +70,7 @@ function plot_bar_chart(data) {
   .attr("text-anchor", "end")
   .attr("class", "xlabel")
   .attr("font-size", "15px")
-  .attr("x", width/2 + margin.left + 40)
+  .attr("x", width/2 + margin.left + 113)
   .attr("y", height + margin.top - 5 )
   .text(defaultFeature);
 

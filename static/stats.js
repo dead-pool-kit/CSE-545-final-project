@@ -35,7 +35,7 @@ function dec_year() {
 
 
 function updateRestAll(yr) {
-  fetch('/worldmap2', {
+  fetch('/worldmap', {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -85,7 +85,7 @@ function updateRestAll(yr) {
 
 
 function updateWmapBar(yr) {
-  fetch('/worldmap2', {
+  fetch('/worldmap', {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -120,7 +120,7 @@ function updateWmapBar(yr) {
 
 // Time player code 
 async function delayedGreeting(year) {
-    fetch('/worldmap2', {
+    fetch('/worldmap', {
       method: "POST",
       headers: {
         'Content-Type': 'application/json'

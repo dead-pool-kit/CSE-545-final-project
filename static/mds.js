@@ -23,7 +23,9 @@ function createMdsCorr(data){
   var keys = data.map(d => d.fields);
   var fieldIndexDict = {};
   for(var i=0; i<keys.length; i++){
-    if(i>25)
+    if(i>=52)
+    fieldIndexDict[keys[i]] = 'c'+String.fromCharCode(65+i-52);
+    else if(i>=26)
       fieldIndexDict[keys[i]] = 'b'+String.fromCharCode(65+i-26);
     else
       fieldIndexDict[keys[i]] = 'a'+String.fromCharCode(65+i);
@@ -359,118 +361,10 @@ function createMdsCorr(data){
   
       pp.exit()
       .remove()
-  
-  
- 
-  
-    function handleClick(d){
-      var sel = d3.select(this)
-
-      sel.style("fill", "green").attr('r', 13)
-      
-      defaultFeature = d.fields;
-      console.log('wmdsFTRSel: '+ d.fields)
-      // fetch('/worldmap2', {
-      //   method: "POST",
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify(defaultFeature)
-      // })
-      // .then(function (response) {
-      //     return response.json();
-      // }).then(function (worldMap) {
-      //   fetch('/coordinates')
-      //     .then(function (response2) {
-      //         return response2.json();
-      //     }).then(function (topo) {
-      //       createWorldMap(worldMap, topo, 2019)
-      //     });
-      // });
-
-
-      if(prev != -1){
-        console.log('mapfieldsssss:  '+ d.fields)
-        var merged= getClass(d.fields, axisOrder[prev])
-        var ind1
-        var ind2
-  
-        if(map[d.fields] == true)
-          return
-  
-        for(i=0; i<keys.length; i++){
-          if(d.fields === keys[i])
-            ind2 = i
-  
-          if(axisOrder[prev] === keys[i])
-            ind1 = i
-        }
-  
-        if(ind1<ind2){
-          d3.select('.'+ merged)
-          .style("visibility", "visible")
-          .style("marker-end", "url(#triangle)")
-        }
-        else{
-          d3.select('.'+merged)
-          .style("visibility", "visible")
-          .style("marker-start", "url(#triangle)")
-        }
-      }
-      prev++;
-      axisOrder.push(d.fields);
-      map[d.fields]= true
-  
-      if(prev == totalFields - 1){
-        fetch('/pcp', {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({'year': year, 'axis': axisOrder})
-        })
-          .then(function (response) {
-          console.table('rspppp!!!!' + response)
-          return response.json();
-        }).then(function (data) {
-          createPCPPlot2(data, axisOrder)
-          console.log('orderrrr: '+axisOrder)
-          map= {}
-          axisOrder = []
-          prev = -1
-  
-          for(i=0; i<keys.length; i++){
-            for(j=i+1; j<keys.length; j++){
-        
-              var merged= getClass(keys[i], keys[j])
-        
-              mdsCorr.append("svg:defs").append("svg:marker")
-              .attr("id", "triangle")
-              .attr("refX", 2)
-              .attr("refY", 6)
-              .attr("markerWidth",12)
-              .attr("markerHeight", 12)
-              .attr("orient", "auto")
-              .append("svg:path")
-              .attr("d", "M2,2 L2,11 L10,6 L2,2")
-              .style("fill", "pink");
-        
-              mdsCorr.selectAll("."+ merged)
-              .style("visibility", "hidden")
-            }
-          }
-  
-          mdsCorr.selectAll(".cpoint").attr("r", 9)
-          .style("fill", function(d) { return color(d.x); })
-  
-        });
-      }
-  
-    }
 
     function UpdateRestCharts(ySt, yEnd){
       
-      fetch('/worldmap2', {
+      fetch('/worldmap', {
         method: "POST",
         headers: {
           'Content-Type': 'application/json'
@@ -502,7 +396,7 @@ function createMdsCorr(data){
         update_bar_chart(data)
       });
 
-      fetch('/timeser2', {
+      fetch('/timeser', {
         method: "POST",
         headers: {
           'Content-Type': 'application/json'
