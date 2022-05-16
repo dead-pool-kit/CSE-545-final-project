@@ -1,5 +1,12 @@
 yearEnd = 2019
-year = 2000
+country = 'USA';
+year = 2000;
+dependentFtr = "Exports of goods and services (% of GDP)"
+dependentFeatureList= ["Exports of goods and services (% of GDP)",                                                         
+    "Trade (% of GDP)",                                                                                
+    "Mineral rents (% of GDP)",                                                                        
+    "GDP (current US$)",                                                                                
+    "GNI (current US$)" ]
 
 fetch('/hypothesis', {
   method: "POST",
@@ -7,7 +14,7 @@ fetch('/hypothesis', {
     'Content-Type': 'application/json'
   },
 
-  body: JSON.stringify({'yearSt': year, 'yearEnd': year, 'axis': axis_order})
+  body: JSON.stringify({'country': country, 'dependentFtr': dependentFtr, 'listFtr': dependentFeatureList})
 })
   .then(function (response) {
       return response.json();
@@ -27,7 +34,7 @@ function findHypothesis(dataHypo){
     .style("padding", "10px")
     .append("table")
     // .attr("class", "tableTooltip")
-    .attr("width", 40)
+    .attr("width", 520)
     .attr("height", 40)
 
     var thead = Tooltiptable.append('thead')
@@ -98,6 +105,8 @@ function findSimilarity(dataSimiar){
         console.log("dataSimiar")
         console.log(dataSimiar)
 
+        d3.select(".simlarityTable").selectAll("*").remove()
+
         var keys = Object.keys(dataSimiar[0])
 
         Tooltiptable = d3.select('.simlarityTable')
@@ -108,8 +117,8 @@ function findSimilarity(dataSimiar){
         .style("padding", "10px")
         .append("table")
         // .attr("class", "tableTooltip")
-        .attr("width", 40)
-        .attr("height", 40)
+        .attr("width", 60)
+        .attr("height", 80)
     
         var thead = Tooltiptable.append('thead')
         var	tbody = Tooltiptable.append('tbody')

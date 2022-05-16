@@ -122,7 +122,7 @@
             <br>
             
             <div class="row">
-                <div class="col-4 box p-2">
+                <div class="col-3 box p-2">
                     
                     <h5 style="display: inline-flex;"><i class="fa-solid fa-chart-bar"></i>
                         Bar Chart
@@ -141,24 +141,24 @@
                     <div id="bar_chart"></div>
                 
                 </div>
-                <div class="col-4 box p-2">
+                <div class="col-5 box p-2">
                     
                         <h5><i class="fa-solid fa-grip-lines-vertical"></i><i class="fa-solid fa-grip-lines-vertical"></i>
                             Hypothesis and Similarity</h5>
                         <br>
                         <div class="container" >
-                            <div class="hyponav"  style="font-size:large; float: left ;width:100px;">
-                                <h7>Hypothesis</h7><br>
-                                <label for="dropdown">Select a Dependent Field: &nbsp;</label><br>
-                                <select class="dropdown" id="dependentdropdown" name="dropdown" style="height: 32px; width:200px; margin-right: 50px;">
+                            <div class="hyponav"  style="margin-left: -25px;font-size:large; float: left ;width:580px;">
+                                <h7 style="color: forestgreen;font-size: 23px;margin-left: 180px;">Hypothesis</h7><br>
+                                <label class = "h5" style="margin-left:85px; font-size:20px" for="dropdown">Select a Dependent Field: &nbsp;</label>
+                                <select class="dropdown" id="dependentdropdown" name="dropdown" style="height: 32px; width:300px; margin-right: 50px; margin-left:85px">
                                 </select><br>
                                 <br>
-                                <input type="submit"  onclick='handlePval(this);' value="Generate p-val">
+                                <input type="submit"  style="height: 50px; width:100px; margin-right: 50px; margin-left:205px" onclick='handlePval(this);' value="Generate p-val">
                                 <div class="pValTable"></div>
                             </div>
 
                             <div class="similarnav"  style="font-size:large; float: right;">
-                                <h7>Similarity</h7><br>
+                                <h7 style="color: forestgreen;font-size: 23px;margin-left: 80px;">Similarity</h7><br>
                                 <br>
                                 <div class="simlarityTable"></div>
                             </div>
@@ -264,13 +264,15 @@
             }
 
             function handlePval(){
+                dependentFtr = d3.select('select#dependentdropdown').property('value')
+
                 fetch('/hypothesis', {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json'
                     },
 
-                    body: JSON.stringify({'yearSt': year, 'yearEnd': year, 'axis': axis_order})
+                    body: JSON.stringify({'country': country, 'dependentFtr': dependentFtr, 'listFtr': dependentFeatureList})
                     })
                     .then(function (response) {
                         return response.json();
@@ -279,7 +281,7 @@
                 });
             }
 
-            function handlePval(){
+            function handlePval2(){
                 fetch('/similarity', {
                     method: "POST",
                     headers: {

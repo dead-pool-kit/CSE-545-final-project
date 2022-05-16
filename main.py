@@ -214,16 +214,16 @@ def getHypothesis():
     global dataMainCountries
 
     if(request.method == 'POST'):
-        yearSt = request.get_json()['yearSt']
-        yearEnd = request.get_json()['yearEnd']
-        axisList = request.get_json()['axis']
+        country = request.get_json()['country']
+        dependentFtr = request.get_json()['dependentFtr']
+        listFtr = request.get_json()['listFtr']
 
     res = {}
-    res['A']=1
-    res['B']=2
-    res['C']=3
-    res['D']=4
-    res['E']=5
+    res['Ahbsdfjhsbdjbfsjdfxgdfd']=1
+    res['BAhbsdfjhsbdjbfsdfvdfxjd']=2
+    res['CAhbsdvcbjngdkjffjhsbdjbfsjd']=3
+    res['DAhbsdfjhsbdjbfsjdfkjdfnkndfnkfsjdfgdgd']=4
+    res['EAhbsdfjhsbdjbfsjdfgd']=5
     res['pVal']=0.05
     res['fVal']=100
 
@@ -245,11 +245,11 @@ def getSimilarity():
     res = [] 
     # take only top 5
     
-    for i in range(5):
+    for i in range(10):
         xx=(('ctry'+str(i), 'year'+str(i)),i)
         res.append(xx)
   
-    res= res[:5]
+    res= res[:10]
 
     for ele in res:
         map = {}
