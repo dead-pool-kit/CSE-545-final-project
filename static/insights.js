@@ -36,7 +36,7 @@ function findHypothesis(dataHypo){
     .style("padding", "10px")
     .append("table")
     // .attr("class", "tableTooltip")
-    .attr("width", 520)
+    .attr("width", 450)
     .attr("height", 40)
 
     var thead = Tooltiptable.append('thead')
@@ -45,7 +45,7 @@ function findHypothesis(dataHypo){
     
     thead.append('tr')
     .selectAll('th')
-    .data(['Features','Values']).enter()
+    .data(['Features','Values/Weights']).enter()
     .append('th')
         .text(function (column) { return column; })
         .style("text-anchor", "start")
@@ -105,13 +105,20 @@ fetch('/similarity', {
 
 function findSimilarity(dataSimiar){
 
-    d3.select(".simlarityTable").selectAll("*").remove()
-
+  
+    d3.select("#similarTitle").selectAll("*").remove()
+    
         d3.select(".simlarityTable").selectAll("*").remove()
+
+        d3.select("#similarTitle")
+        .html("Top 10 countries similar in trend as of "+ country + " in "+ year+" are: ")
+        .attr("fill","blue")
+
+
 
         var keys = Object.keys(dataSimiar[0])
 
-        Tooltiptable = d3.select('.simlarityTable')
+      Tooltiptable = d3.select('.simlarityTable')
         // .style("background-color", "white")
         // .style("border", "solid")
         // .style("border-width", "2px")
@@ -133,25 +140,10 @@ function findSimilarity(dataSimiar){
             .style("text-anchor", "start")
     // .style("font-size", "35px")
 
-    
-    // var modifiedData= []
-    // for (const [key, value] of Object.entries(dataSimiar)) {
-    //     tmp = [key, value];
-    //     modifiedData.push(tmp)
-    //   }
-    
     var rows = tbody.selectAll('tr')
               .data(dataSimiar)
               .enter()
               .append('tr');
-    
-        // // create a cell in each row for each column
-        // var cells = rows.selectAll('td')
-        // .data(function (row,i) {return row; })
-        // .enter()
-        // .append('td')
-        //   .text(function (d) { return d; });
-
 
           var cells = rows.selectAll('td')
 		  .data(function (row) {

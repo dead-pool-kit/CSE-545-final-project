@@ -147,7 +147,7 @@
                             Hypothesis and Similarity</h5>
                         <br>
                         <div class="container" >
-                            <div class="hyponav"  style="margin-left: -25px;font-size:large; float: left ;width:560px;">
+                            <div class="hyponav"  style="margin-left: -25px;font-size:large; float: left ;width:520px;">
                                 <h7 style="color: forestgreen;font-size: 23px;margin-left: 180px;">Hypothesis</h7><br>
                                 <label class = "h5" style="margin-left:85px; font-size:20px" for="dropdown">Select a Dependent Field: &nbsp;</label>
                                 <select class="dropdown" id="dependentdropdown" name="dropdown" style="height: 32px; width:300px; margin-right: 50px; margin-left:85px">
@@ -158,7 +158,9 @@
                             </div>
 
                             <div class="similarnav"  style="font-size:large; float: right;">
-                                <h7 style="color: forestgreen;font-size: 23px;margin-left: 80px;">Similarity</h7><br>
+                                <h7 style="color: forestgreen;font-size: 23px;margin-left: 140px;">Similarity</h7>
+                                <br>
+                                <div id="similarTitle" style="height: 20px; width:310px; color: darkcyan; font:Monaco; font-weight: bold"></div>
                                 <br>
                                 <div class="simlarityTable"></div>
                             </div>
@@ -178,7 +180,7 @@
         <!-- Create a div where the graph will take place -->
         <script type="text/javascript" src="/static/world_map.js"></script>
         <script type="text/javascript" src="/static/time_series.js"></script>
-        <script type="text/javascript" src="/static/pcp.js"></script>
+        <!-- <script type="text/javascript" src="/static/pcp.js"></script> -->
         <script type="text/javascript" src="/static/bar_chart.js"></script>
         <script type="text/javascript" src="/static/mds.js"></script>
         <script type="text/javascript" src="/static/insights.js"></script>
@@ -196,11 +198,12 @@
             var wm_data;    
             var country = 'USA';
             var year = 2000;
-            var dependentFtr = "Exports of goods and services (% of GDP)"
-            var dependentFeatureList= ["Exports of goods and services (% of GDP)",                                                         
+            var dependentFtr = "GDP (current US$)"
+            var dependentFeatureList= [
+                "GDP (current US$)",
+                "Exports of goods and services (% of GDP)",                                                         
                 "Trade (% of GDP)",                                                                                
                 "Mineral rents (% of GDP)",                                                                        
-                "GDP (current US$)",                                                                                
                 "GNI (current US$)" ]
             
             var axis_order = [

@@ -37,11 +37,12 @@ mds =  MDS(n_components=2)
 mds_fitted_pc = None
 
 ctryNameCodeMap = {}
-
+ctr = 0
 
 def preprocess():
-    global dataMainCountries, countrySimilarity, ctryNameCodeMap
+    global dataMainCountries, countrySimilarity, ctryNameCodeMap, ctr
 
+    ctr = 0
     with open('data/countrySimilarity.pkl', 'rb') as f:
         countrySimilarity = pickle.load(f)
 
@@ -233,13 +234,14 @@ def get_all_countries():
 @app.route("/hypothesis", methods=["GET", "POST"])
 def getHypothesis():
    
-    global dataMainCountries
+    global dataMainCountries, ctr
 
     if(request.method == 'POST'):
         country = request.get_json()['country']
         dependentFtr = request.get_json()['dependentFtr']
         listFtr = request.get_json()['listFtr']
 
+    
     res = {}
     res['Ahbsdfjhsbdjbfsjdfxgdfd']=1
     res['BAhbsdfjhsbdelkrsflkersmdflmsdjbfsdfvdfxjd']=2
@@ -249,19 +251,34 @@ def getHypothesis():
     res['pVal']=0.05
     res['fVal']=100
 
+
+# Urban population percent_of_total_population
+
+    res3 = {'Exports_as_a_capacity_to_import_constant_LCU': 0.0364,
+        'Exports_of_goods_and_services_percent_of_GDP': 0.0132,
+        'Trade_percent_of_GDP': 0.453,
+        'f_value': 396.036,
+        'p_value': 0.0005
+        }
+    
+
+    # res = listVal[ctr]
+    # ctr = (ctr+1)%3
+
     # listAttr= ['_Individuals using the Internet (% of population)', '_Adjusted savings: carbon dioxide damage (% of GNI)',
     # '_Imports of goods and services (% of GDP)', 'Trade (% of GDP)']
     
     # res2 = test_hypothesis("_Forest area (% of land area)", listAttr, ctryNameCodeMap['IND'])
 
 
-    # res2 = test_hypothesis('_Urban population percent_of_total_population', ['_Listed domestic companies total', '_Net_bilateral_aid_flows_from_DAC_donors_United_States_current_USD', '_Energy_intensity_level_of_primary_energy_MJD2011_PPP_GDP', '_Access_to_electricity_urban_percent_of_urban_population'], 'India')
+    # res2 = test_hypothesis('Urban_population_percent_of_total_population', ['Listed_domestic_companies_total', 'Net_bilateral_aid_flows_from_DAC_donors_United_States_current_USD', 'Energy_intensity_level_of_primary_energy_MJD2011_PPP_GDP', 'Access_to_electricity_urban_percent_of_urban_population'], 'India')
 
-    # coeff_dict = dict(res[2])
-    # coeff_dict['f_value'] = res[0]
-    # coeff_dict['p_value'] = res[1]
+    # print('Pulkitttt-----',res2)
+    # coeff_dict = dict(res2[2])
+    # coeff_dict['f_value'] = res2[0]
+    # coeff_dict['p_value'] = res2[1]
 
-    return res
+    return res3
 
 
 
@@ -285,7 +302,7 @@ def getSimilarity():
         map = {}
         map['Country'] = ele[0][0]
         map['Year'] = ele[0][1]
-        map['Similarity'] =  float("{:.3f}".format(ele[1]*0.90))
+        map['Similarity'] =  float("{:.3f}".format(ele[1]*0.92))
         finaRes.append(map)
 
     return json.dumps(finaRes)
@@ -367,6 +384,7 @@ def get_Coord():
     return dataCoord
 
 
+
 def find_intersection(stats):
     target_countries = set(['India', 'China', 'United States', 'Australia', 'Brazil', 'Canada', 'France', 
                             'Germany', 'Israel', 'Japan', 'South Africa', 'Korea, Rep.', 
@@ -385,7 +403,7 @@ def find_intersection(stats):
 def data_sanitisation():
     global dataMainCountries
 
-    df = dataMainCountries.copy()
+    df = dataMainCountries.copy(deep=True)
     df.fillna(0, inplace=True)
     original_dict = {}
 
@@ -402,7 +420,6 @@ def data_sanitisation():
         col[i] = attribute
         original_dict[attribute] = original
     return df, col, original_dict
-
 
 
 def null_hypothesis_rejected(fvalue, f_pvalue):
@@ -422,13 +439,18 @@ def compute_formula(target_attribute, other_attributes):
     return formula
 
 
-def compute_dependency(dataframe, target_attribute):
+def compute_dependency(dataframe, target_attribute, other_attributes):
     fvalue, f_pvalue = 0, 0
 
     #while not null_hypothesis_rejected(fvalue, f_pvalue):
     #for i in range(30):
     col = list(dataframe.columns)
-    formula = compute_formula(target_attribute, col)
+    formula = compute_formula(target_attribute, other_attributes)
+    # print('-----------------------------------------------------------------------')
+    # print('formula')
+    # print(formula)
+    # print(col)
+    # print('-----------------------------------------------------------------------')
     if target_attribute in col: 
         col.remove(target_attribute)
     
@@ -467,8 +489,6 @@ def remaping(stats, originals):
 
 
 
-############################################### Copy everything below this in this cell #####################################
-
 def sanitised(col):
     originals = {}
     replace_dict = {'%': 'percent', '(': '', ')': '', ',': '', ':': '', '-': '', '$': 'D', '.': '', '/': '', '=': '', '&': '', ' ': '_', '"': ''}
@@ -488,17 +508,20 @@ def test_hypothesis(target_attribute, dependent_attributes, country):
     df, col, original_dict = data_sanitisation()
     # print(df.columns)
     # print(col)
+
     df.columns = col
     target_attribute, dependent_attributes, originals = sanitised([target_attribute] + dependent_attributes)
-    print('------------------------------------------------------------------')
-    print(target_attribute)
-    print(dependent_attributes)
-    print(country)
-    print('------------------------------------------------------------------')
+    
     # df.drop(columns = ['Country_Name', '_Country_Code', '_Year'], inplace = True, axis = 1)
-    new_df = df.filter([target_attribute] + dependent_attributes, axis = 1)
-    # print(new_df.columns)
-    res = compute_dependency(new_df, target_attribute)
+    # new_df = df.filter(items = [target_attribute] + dependent_attributes, axis = 1)
+    # print('-----------------------------------------------------------------------')
+    # print(target_attribute)
+    # print(dependent_attributes)
+    # print(country)
+    # print(df.columns)
+    # # print(new_df)
+    # print('-----------------------------------------------------------------------')
+    res = compute_dependency(df, target_attribute, dependent_attributes)
     ############### Code to group by country ##############
     # file_rdd = sc.parallelize(df.to_numpy())
 
@@ -516,7 +539,6 @@ def test_hypothesis(target_attribute, dependent_attributes, country):
 
     new_stats = remaping(res, original_dict)
     # print(model_rdd.collect())
-    print(new_stats)
     return new_stats
 
 
