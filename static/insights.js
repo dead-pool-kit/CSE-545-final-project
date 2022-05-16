@@ -1,5 +1,5 @@
-yearEnd = 2019
 year = 2000
+country = "USA"
 
 fetch('/hypothesis', {
   method: "POST",
@@ -85,7 +85,7 @@ fetch('/similarity', {
       'Content-Type': 'application/json'
     },
   
-    body: JSON.stringify({'yearSt': year, 'yearEnd': year, 'axis': axis_order})
+    body: JSON.stringify({'year': year, 'country': country})
   })
     .then(function (response) {
         return response.json();
@@ -95,8 +95,8 @@ fetch('/similarity', {
 
 
 function findSimilarity(dataSimiar){
-        console.log("dataSimiar")
-        console.log(dataSimiar)
+
+    d3.select(".simlarityTable").selectAll("*").remove()
 
         var keys = Object.keys(dataSimiar[0])
 

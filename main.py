@@ -1,3 +1,4 @@
+from cmath import nan
 from flask import Flask, redirect, url_for, render_template, jsonify, request
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
@@ -11,6 +12,18 @@ import random
 from sklearn.manifold import MDS
 from sklearn.cluster import KMeans
 import sys
+import pickle
+
+import pyspark
+from pyspark.sql import SparkSession
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+
+
+
+
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -21,14 +34,26 @@ dataCoord = 1
 listCountryCodeTime= ['IND']
 
 cluster_count = 3
-
+countrySimilarity = nan
 mds =  MDS(n_components=2)
 mds_fitted_pc = None
+sc = pyspark.SparkContext()
+
+ctryNameCodeMap = {}
 
 
 def preprocess():
-    global dataMainCountries
+    global dataMainCountries, countrySimilarity, ctryNameCodeMap
 
+    with open('data/countrySimilarity.pkl', 'rb') as f:
+        countrySimilarity = pickle.load(f)
+
+
+    # df_country_updated = pd.DataFrame(dataMainCountries['Country Name'].unique(), columns=['Country Name'])
+    # df_country_updated['Country Code'] = pd.DataFrame(dataMainCountries['Country Code'].unique())
+
+    ctryNameCodeMap = dict(zip(dataMainCountries['Country Code'], dataMainCountries['Country Name']))
+    
     selFtrs = [
     "Year",
     'Country Code',
@@ -227,35 +252,44 @@ def getHypothesis():
     res['pVal']=0.05
     res['fVal']=100
 
-    return res
+    # listAttr= ['_Individuals using the Internet (% of population)', '_Adjusted savings: carbon dioxide damage (% of GNI)',
+    # '_Imports of goods and services (% of GDP)', 'Trade (% of GDP)']
+    
+    # res2 = test_hypothesis("_Forest area (% of land area)", listAttr, ctryNameCodeMap['IND'])
+
+
+    res2 = test_hypothesis('_Urban_population_percent_of_total_population', ['_Listed_domestic_companies_total', '_Net_bilateral_aid_flows_from_DAC_donors_United_States_current_USD', '_Energy_intensity_level_of_primary_energy_MJD2011_PPP_GDP', '_Access_to_electricity_urban_percent_of_urban_population'], 'India')
+
+
+    coeff_dict = dict(res2[2])
+    coeff_dict['f_value'] = res2[0]
+    coeff_dict['p_value'] = res2[1]
+
+    return res2
+
 
 
 @app.route("/similarity", methods=["GET", "POST"])
 def getSimilarity():
    
-    global dataMainCountries
+    global countrySimilarity
 
+    # print(countrySimilarity)
     if(request.method == 'POST'):
-        yearSt = request.get_json()['yearSt']
-        yearEnd = request.get_json()['yearEnd']
-        axisList = request.get_json()['axis']
+        year = request.get_json()['year']
+        country = request.get_json()['country']
 
     #list of json= {((cnt1,cnt2),corr)}
     finaRes = []
     res = [] 
     # take only top 5
-    
-    for i in range(5):
-        xx=(('ctry'+str(i), 'year'+str(i)),i)
-        res.append(xx)
-  
-    res= res[:5]
+    res = countrySimilarity[(country, str(year))][:5]
 
     for ele in res:
         map = {}
         map['Country'] = ele[0][0]
         map['Year'] = ele[0][1]
-        map['Distance'] = ele[1]
+        map['Similarity'] =  float("{:.3f}".format(ele[1]))
         finaRes.append(map)
 
     return json.dumps(finaRes)
@@ -335,6 +369,132 @@ def get_Coord():
     # dataRidgetmp = dataRidge.to_dict(orient="records")
     # print(mds_dcata)
     return dataCoord
+
+
+def find_intersection(stats):
+    target_countries = set(['India', 'China', 'United States', 'Australia', 'Brazil', 'Canada', 'France', 
+                            'Germany', 'Israel', 'Japan', 'South Africa', 'Korea, Rep.', 
+                            'Mexico', 'New Zealand', 'Netherlands', 'Pakistan', 'Portugal', 
+                            'Russian Federation', 'Singapore', 'Spain', 'Thailand', 'United Kingdom', 'Vietnam'])
+
+    related_attributes = set(dict(stats[0][1][3]))
+    for country, value in stats[1:]:
+        if country in target_countries:
+            attributes = dict(value[3])
+            related_attributes = related_attributes & attributes
+            # stats[0][1][3] = 
+
+    return related_attributes
+
+def data_sanitisation():
+    global dataMainCountries
+
+    df = dataMainCountries
+    df.fillna(0, inplace=True)
+    original_dict = {}
+
+    col = list(df.columns)
+    # index_dictionary = {}
+    replace_dict = {'%': 'percent', '(': '', ')': '', ',': '', ':': '', '-': '', '$': 'D', '.': '', '/': '', '=': '', '&': '', ' ': '_', '"': ''}
+
+
+
+    for i, attribute in enumerate(col):
+        original = attribute
+        for key in replace_dict:
+            attribute = attribute.replace(key, replace_dict[key])
+        col[i] = attribute
+        original_dict[attribute] = original
+    return df, col, original_dict
+
+
+
+def null_hypothesis_rejected(fvalue, f_pvalue):
+    return fvalue > 1 and f_pvalue < 0.05
+
+
+def compute_formula(target_attribute, other_attributes):
+    formula = str(target_attribute) + " ~ "
+
+    for i, attribute in enumerate(other_attributes):
+        # print(attribute)
+        if attribute != target_attribute:
+            formula += str(other_attributes[i]) + " + "
+
+    formula = formula[:-3]
+    # print(formula)
+    return formula
+
+
+def compute_dependency(dataframe, target_attribute):
+    fvalue, f_pvalue = 0, 0
+
+    #while not null_hypothesis_rejected(fvalue, f_pvalue):
+    #for i in range(30):
+    col = list(dataframe.columns)
+    formula = compute_formula(target_attribute, col)
+    if target_attribute in col: 
+        col.remove(target_attribute)
+    
+    try:
+        model = smf.ols(formula = formula, data = dataframe)
+
+    except:
+        # print('formula: ', formula)
+        # print('target: ', target_attribute)
+        # print('dataframe: ', dataframe)
+        return 0, 0, 0, []
+
+        
+    result = model.fit()
+    fvalue = result.fvalue
+    f_pvalue = result.f_pvalue
+    params = list(result.params)
+    mapped_params = [(col[i], params[i]) for i in range(min(len(params), len(col)))]
+    sorted_params = sorted(mapped_params, key = lambda x: abs(x[1]))
+    least_imp_param = sorted_params[0][0]
+    dataframe.drop(least_imp_param, inplace=True, axis=1)
+
+    if len(sorted_params) < 3:
+        return fvalue, f_pvalue, len(sorted_params), sorted_params
+
+    # print(params)
+
+    return fvalue, f_pvalue, sorted_params # result
+
+
+def remaping(stats, originals):
+    print(stats)
+    for j, attribute in enumerate(stats[2]):
+        stats[2][j] = (originals[stats[2][j][0]], stats[2][j][1])
+    return stats
+
+
+
+############################################### Use This Function ########################################
+def test_hypothesis(target_attribute, dependent_attributes, country):
+    df, col, original_dict = data_sanitisation()
+    df.filter([target_attribute] + dependent_attributes, axis = 1)
+
+    file_rdd = sc.parallelize(df.to_numpy())
+
+    # ############### Code to group by country ##############
+    grouped_rdd = file_rdd.map(lambda x: (x[0], x[3:])).groupByKey().mapValues(list)
+
+    df_rdd = grouped_rdd.map(lambda x: (x[0], pd.DataFrame(x[1], columns = col[3:]) ))       # Grouping Country wise and dropping country code and time fields
+    
+    model_rdd = df_rdd.map(lambda x: (x[0], compute_dependency(x[1], target_attribute))) #.map(lambda x: (x[0], x[1].params))
+
+    
+    # summary_rdd = model_rdd.map(lambda x: (x[0], x[1].fvalue, x[1].f_pvalue))
+    stats = model_rdd.collectAsMap()
+
+    res = stats[country]
+
+    new_stats = remaping(res, original_dict)
+    # print(model_rdd.collect())
+    return new_stats
+   
 
 @app.route("/")
 def index():

@@ -80,6 +80,21 @@ function updateRestAll(yr) {
       d3.select('input[name="topWrst"]').node().checked = false
       update_bar_chart(data)
     });
+
+
+    fetch('/similarity', {
+      method: "POST",
+      headers: {
+          'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify({'year': year, 'country': country})
+      })
+      .then(function (response) {
+          return response.json();
+      }).then(function (data) {
+          findSimilarity(data, axis_order)
+  });
 }
 
 

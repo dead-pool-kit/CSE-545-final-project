@@ -286,7 +286,7 @@
                         'Content-Type': 'application/json'
                     },
 
-                    body: JSON.stringify({'yearSt': year, 'yearEnd': year, 'axis': axis_order})
+                    body: JSON.stringify({'year': year, 'country': country})
                     })
                     .then(function (response) {
                         return response.json();
