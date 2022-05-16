@@ -33,8 +33,8 @@ function createMdsCorr(data){
   
   
   margin = {top: 60, right: 60, bottom: 60, left:80},
-  width = 550 - margin.left - margin.right,
-  height = 365 - margin.top - margin.bottom;
+  width = 750 - margin.left - margin.right,
+  height = 465 - margin.top - margin.bottom;
   
   var zoom = d3version6.zoom()
   .scaleExtent([1, 5])

@@ -14,8 +14,6 @@ from sklearn.cluster import KMeans
 import sys
 import pickle
 
-import pyspark
-from pyspark.sql import SparkSession
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
@@ -37,7 +35,6 @@ cluster_count = 3
 countrySimilarity = nan
 mds =  MDS(n_components=2)
 mds_fitted_pc = None
-sc = pyspark.SparkContext()
 
 ctryNameCodeMap = {}
 
@@ -239,16 +236,16 @@ def getHypothesis():
     global dataMainCountries
 
     if(request.method == 'POST'):
-        yearSt = request.get_json()['yearSt']
-        yearEnd = request.get_json()['yearEnd']
-        axisList = request.get_json()['axis']
+        country = request.get_json()['country']
+        dependentFtr = request.get_json()['dependentFtr']
+        listFtr = request.get_json()['listFtr']
 
     res = {}
-    res['A']=1
-    res['B']=2
-    res['C']=3
-    res['D']=4
-    res['E']=5
+    res['Ahbsdfjhsbdjbfsjdfxgdfd']=1
+    res['BAhbsdfjhsbdelkrsflkersmdflmsdjbfsdfvdfxjd']=2
+    res['CAhbsdvcbjngdkjffjhsbdjbfsjd']=3
+    res['ffddffffs']=4
+    res['EAhbsdfjhsbdjbfsjdfgd']=5
     res['pVal']=0.05
     res['fVal']=100
 
@@ -258,14 +255,13 @@ def getHypothesis():
     # res2 = test_hypothesis("_Forest area (% of land area)", listAttr, ctryNameCodeMap['IND'])
 
 
-    res2 = test_hypothesis('_Urban_population_percent_of_total_population', ['_Listed_domestic_companies_total', '_Net_bilateral_aid_flows_from_DAC_donors_United_States_current_USD', '_Energy_intensity_level_of_primary_energy_MJD2011_PPP_GDP', '_Access_to_electricity_urban_percent_of_urban_population'], 'India')
+    # res2 = test_hypothesis('_Urban population percent_of_total_population', ['_Listed domestic companies total', '_Net_bilateral_aid_flows_from_DAC_donors_United_States_current_USD', '_Energy_intensity_level_of_primary_energy_MJD2011_PPP_GDP', '_Access_to_electricity_urban_percent_of_urban_population'], 'India')
 
+    # coeff_dict = dict(res[2])
+    # coeff_dict['f_value'] = res[0]
+    # coeff_dict['p_value'] = res[1]
 
-    coeff_dict = dict(res2[2])
-    coeff_dict['f_value'] = res2[0]
-    coeff_dict['p_value'] = res2[1]
-
-    return res2
+    return res
 
 
 
@@ -283,13 +279,13 @@ def getSimilarity():
     finaRes = []
     res = [] 
     # take only top 5
-    res = countrySimilarity[(country, str(year))][:5]
+    res = countrySimilarity[(country, str(year))][:10]
 
     for ele in res:
         map = {}
         map['Country'] = ele[0][0]
         map['Year'] = ele[0][1]
-        map['Similarity'] =  float("{:.3f}".format(ele[1]))
+        map['Similarity'] =  float("{:.3f}".format(ele[1]*0.90))
         finaRes.append(map)
 
     return json.dumps(finaRes)
@@ -389,7 +385,7 @@ def find_intersection(stats):
 def data_sanitisation():
     global dataMainCountries
 
-    df = dataMainCountries
+    df = dataMainCountries.copy()
     df.fillna(0, inplace=True)
     original_dict = {}
 
@@ -443,7 +439,7 @@ def compute_dependency(dataframe, target_attribute):
         # print('formula: ', formula)
         # print('target: ', target_attribute)
         # print('dataframe: ', dataframe)
-        return 0, 0, 0, []
+        return 0, 0, []
 
         
     result = model.fit()
@@ -471,30 +467,59 @@ def remaping(stats, originals):
 
 
 
+############################################### Copy everything below this in this cell #####################################
+
+def sanitised(col):
+    originals = {}
+    replace_dict = {'%': 'percent', '(': '', ')': '', ',': '', ':': '', '-': '', '$': 'D', '.': '', '/': '', '=': '', '&': '', ' ': '_', '"': ''}
+
+    for i, attribute in enumerate(col):
+        original = attribute
+        for key in replace_dict:
+            attribute = attribute.replace(key, replace_dict[key])
+        col[i] = attribute
+        originals[attribute] = original
+
+        return col[0], col[1:], originals
+
+
 ############################################### Use This Function ########################################
 def test_hypothesis(target_attribute, dependent_attributes, country):
     df, col, original_dict = data_sanitisation()
-    df.filter([target_attribute] + dependent_attributes, axis = 1)
+    # print(df.columns)
+    # print(col)
+    df.columns = col
+    target_attribute, dependent_attributes, originals = sanitised([target_attribute] + dependent_attributes)
+    print('------------------------------------------------------------------')
+    print(target_attribute)
+    print(dependent_attributes)
+    print(country)
+    print('------------------------------------------------------------------')
+    # df.drop(columns = ['Country_Name', '_Country_Code', '_Year'], inplace = True, axis = 1)
+    new_df = df.filter([target_attribute] + dependent_attributes, axis = 1)
+    # print(new_df.columns)
+    res = compute_dependency(new_df, target_attribute)
+    ############### Code to group by country ##############
+    # file_rdd = sc.parallelize(df.to_numpy())
 
-    file_rdd = sc.parallelize(df.to_numpy())
+    # grouped_rdd = file_rdd.map(lambda x: (x[0], x[3:])).groupByKey().mapValues(list)
 
-    # ############### Code to group by country ##############
-    grouped_rdd = file_rdd.map(lambda x: (x[0], x[3:])).groupByKey().mapValues(list)
-
-    df_rdd = grouped_rdd.map(lambda x: (x[0], pd.DataFrame(x[1], columns = col[3:]) ))       # Grouping Country wise and dropping country code and time fields
+    # df_rdd = grouped_rdd.map(lambda x: (x[0], pd.DataFrame(x[1], columns = col[3:]) ))       # Grouping Country wise and dropping country code and time fields
     
-    model_rdd = df_rdd.map(lambda x: (x[0], compute_dependency(x[1], target_attribute))) #.map(lambda x: (x[0], x[1].params))
+    # model_rdd = df_rdd.map(lambda x: (x[0], compute_dependency(x[1], target_attribute))) #.map(lambda x: (x[0], x[1].params))
 
     
-    # summary_rdd = model_rdd.map(lambda x: (x[0], x[1].fvalue, x[1].f_pvalue))
-    stats = model_rdd.collectAsMap()
+    # # summary_rdd = model_rdd.map(lambda x: (x[0], x[1].fvalue, x[1].f_pvalue))
+    # stats = model_rdd.collectAsMap()
 
-    res = stats[country]
+    # res = stats[country]
 
     new_stats = remaping(res, original_dict)
     # print(model_rdd.collect())
+    print(new_stats)
     return new_stats
-   
+
+
 
 @app.route("/")
 def index():
