@@ -1,0 +1,72 @@
+{
+    "_Urban_population_percent_of_total_population": [
+        "_Urban_population_growth_annual_percent",
+        "_Forest_area_percent_of_land_area"
+    ],
+    "_Net_bilateral_aid_flows_from_DAC_donors_United_States_current_US$": [],
+    "_Net_bilateral_aid_flows_from_DAC_donors_Total_current_US$": [],
+    "_International_tourism_expenditures_percent_of_total_imports": [
+        "_Adjusted_savings_mineral_depletion_percent_of_GNI",
+        "_Exports_of_goods_and_services_percent_of_GDP",
+        "_Adjusted_savings_carbon_dioxide_damage_percent_of_GNI",
+        "_Forest_area_percent_of_land_area",
+        "_Forest_rents_percent_of_GDP",
+        "_Access_to_electricity_urban_percent_of_urban_population",
+        "_Adjusted_savings_natural_resources_depletion_percent_of_GNI",
+        "_GDP_current_USD",
+        "_Urban_population_percent_of_total_population",
+        "_Individuals_using_the_Internet_percent_of_population",
+        "_Imports_of_goods_and_services_percent_of_GDP",
+        "_Mineral_rents_percent_of_GDP",
+        "_Adjusted_savings_energy_depletion_percent_of_GNI",
+        "_Merchandise_trade_percent_of_GDP",
+        "_Urban_population_growth_annual_percent",
+        "_Renewable_energy_consumption_percent_of_total_final_energy_consumption",
+        "_Trade_percent_of_GDP"
+    ],
+    "_Current_Health_Expenditure": [],
+    "_Cost_of_business_startup_procedures_percent_of_GNI_per_capita": [
+        "_Adjusted_savings_mineral_depletion_percent_of_GNI",
+        "_Exports_of_goods_and_services_percent_of_GDP",
+        "_Adjusted_savings_carbon_dioxide_damage_percent_of_GNI",
+        "_Forest_area_percent_of_land_area",
+        "_Forest_rents_percent_of_GDP",
+        "_Access_to_electricity_urban_percent_of_urban_population",
+        "_Adjusted_savings_natural_resources_depletion_percent_of_GNI",
+        "_GDP_current_USD",
+        "_Urban_population_percent_of_total_population",
+        "_Individuals_using_the_Internet_percent_of_population",
+        "_Imports_of_goods_and_services_percent_of_GDP",
+        "_Mineral_rents_percent_of_GDP",
+        "_Adjusted_savings_energy_depletion_percent_of_GNI",
+        "_Merchandise_trade_percent_of_GDP",
+        "_Urban_population_growth_annual_percent",
+        "_Renewable_energy_consumption_percent_of_total_final_energy_consumption",
+        "_Trade_percent_of_GDP"
+    ],
+    "_Military_expenditure_percent_of_GDP": [
+        "_GDP_current_USD",
+        "_Renewable_energy_consumption_percent_of_total_final_energy_consumption"
+    ],
+    "_Research_and_development_expenditure_percent_of_GDP": [
+        "_Urban_population_percent_of_total_population"
+    ],
+    "_Trade_percent_of_GDP": [
+        "_Adjusted_savings_mineral_depletion_percent_of_GNI",
+        "_Exports_of_goods_and_services_percent_of_GDP",
+        "_Forest_area_percent_of_land_area",
+        "_Adjusted_savings_carbon_dioxide_damage_percent_of_GNI",
+        "_Access_to_electricity_urban_percent_of_urban_population",
+        "_Forest_rents_percent_of_GDP",
+        "_Adjusted_savings_natural_resources_depletion_percent_of_GNI",
+        "_GDP_current_USD",
+        "_Urban_population_percent_of_total_population",
+        "_Individuals_using_the_Internet_percent_of_population",
+        "_Imports_of_goods_and_services_percent_of_GDP",
+        "_Mineral_rents_percent_of_GDP",
+        "_Adjusted_savings_energy_depletion_percent_of_GNI",
+        "_Merchandise_trade_percent_of_GDP",
+        "_Urban_population_growth_annual_percent",
+        "_Renewable_energy_consumption_percent_of_total_final_energy_consumption"
+    ]
+}
